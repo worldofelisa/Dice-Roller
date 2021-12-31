@@ -1,4 +1,4 @@
-package main 
+package main
 
 import (
 	"fmt"
@@ -10,6 +10,7 @@ func main() {
 	rand.Seed(time.Now().UnixNano())
 	const faces = 6
 	const min = 1
-	result:=rand.Intn(faces-min)+min
-	fmt.Println (result)
+	result := rand.Intn(faces-min) + min
+	fmt.Println(result)
+
 }
