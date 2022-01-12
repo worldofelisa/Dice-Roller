@@ -9,40 +9,61 @@ import (
 	"time"
 )
 
-func main() {
-	inputArgs := os.Args
-	listOfDice := []string{}
-
-	for x := 1; x < len(inputArgs); x++ {
-		//we start at one to ignore the program name
-		listOfDice = append(listOfDice, inputArgs[x])
-	}
-
-	for x := 0; x < len(listOfDice); x++ {
-		currentDie := listOfDice[x]
-		indexOfD := strings.Index(currentDie, "d")
-		numberOfDice, err := strconv.Atoi(currentDie[0:indexOfD])
-		if err != nil {
-			fmt.Println("You need to add a number before the number of faces to say how many dice you want to roll. Assumed dice number is 1.")
-			fmt.Println("For example: roll 2 10")
-			numberOfDice = 1
-		}
-		numberOfFaces, err := strconv.Atoi(currentDie[indexOfD+1 : len(currentDie)])
-		if err != nil {
-			fmt.Println("You need to add the number of faces on the die. Assumed dice face valye is 6.")
-			numberOfFaces = 6
-		}
-		for i := 0; i < numberOfDice; i++ {
-			result := RollaDie(numberOfFaces)
-			fmt.Printf("I rolled a d%d and it was a %d\n", numberOfFaces, result)
-		}
-	}
+type Die struct {
+	NumberOfFaces int
 }
 
-func RollaDie(numberofFaces int) (resultOfRoll int) {
+func (d *Die) Roll() (resultOfRoll int) {
 	rand.Seed(time.Now().UnixNano())
 	const min = 1
-	return rand.Intn(numberofFaces-min) + min
+	return rand.Intn(d.NumberOfFaces-min) + min
+}
+
+func ParseArgs(inputArgs []string) []string {
+	listOfArgs := []string{}
+	for x := 1; x < len(inputArgs); x++ {
+		//we start at one to ignore the program name
+		listOfArgs = append(listOfArgs, inputArgs[x])
+	}
+	return listOfArgs
+}
+
+func SliceString(inputString string, start, end, defaultValueInputted int, errorMessage string) int {
+	stringSegment, err := strconv.Atoi(inputString[start:end])
+	if err != nil {
+		fmt.Println(errorMessage)
+		return defaultValueInputted
+	}
+	return stringSegment
+}
+
+func DieSetUp(inputArgs []string) []Die {
+	parsedListOfArgs := ParseArgs(inputArgs)
+	listOfDice := []Die{}
+	for x := 0; x < len(parsedListOfArgs); x++ {
+		currentDie := parsedListOfArgs[x]
+		indexOfD := strings.Index(currentDie, "d")
+		numberOfDice := SliceString(currentDie, 0, indexOfD, 1, "Must add a number of dice before d to state how many dice you want to roll. Assumed number of dice is 1.")
+		numberOfFaces := SliceString(currentDie, indexOfD+1, len(currentDie), 6, "You need to add the type of dice you want to roll based on it face value. Assumed dice face value is 6.")
+
+		for i := 0; i < numberOfDice; i++ {
+			newDie := Die{
+				NumberOfFaces: numberOfFaces,
+			}
+			listOfDice = append(listOfDice, newDie)
+		}
+	}
+	return listOfDice
+}
+
+func main() {
+	inputArgs := os.Args
+	dice := DieSetUp(inputArgs)
+
+	for _, die := range dice {
+		result := die.Roll()
+		fmt.Printf("I rolled a d%d and it was %d\n", die.NumberOfFaces, result)
+	}
 }
 
 // TODO create an extension for the rollies game, or maybe a sub code
